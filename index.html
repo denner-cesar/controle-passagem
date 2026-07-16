@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" 
+content="width=device-width, initial-scale=1.0">
+
+<title>Scanner de Passagens</title>
+
+
+<link rel="stylesheet" href="css/style.css">
+
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+    <!-- TELA INICIAL -->
+
+    <section id="telaInicio" class="card">
+
+
+        <div class="logo">
+            📷
+        </div>
+
+
+        <h1>
+            Scanner de Passagens
+        </h1>
+
+
+        <p>
+            Aponte a câmera para o QR Code da passagem
+        </p>
+
+
+
+        <button 
+        id="btnIniciar"
+        class="btn principal">
+
+            Iniciar Scanner
+
+        </button>
+
+
+
+    </section>
+
+
+
+
+
+    <!-- SCANNER -->
+
+
+    <section 
+    id="telaScanner"
+    class="scanner"
+    hidden>
+
+
+        <video 
+        id="camera"
+        autoplay
+        muted
+        playsinline>
+        </video>
+
+
+
+        <canvas 
+        id="canvas"
+        hidden>
+        </canvas>
+
+
+
+
+        <div class="overlay">
+
+
+            <div class="mira">
+
+                <span></span>
+
+            </div>
+
+
+
+        </div>
+
+
+
+
+
+        <div class="painel">
+
+
+            <h2>
+                Escaneando...
+            </h2>
+
+
+            <p id="status">
+                Posicione o QR Code dentro da área
+            </p>
+
+
+
+            <button
+            id="btnCancelar"
+            class="btn cancelar">
+
+
+                Cancelar câmera
+
+
+            </button>
+
+
+
+        </div>
+
+
+
+    </section>
+
+
+
+
+
+
+    <!-- RESULTADO -->
+
+
+    <div 
+    id="resultado"
+    class="resultado"
+    hidden>
+
+
+        <div class="icone">
+            ✓
+        </div>
+
+
+        <h2 id="resultadoTitulo">
+            Passagem registrada
+        </h2>
+
+
+        <p>
+            Número:
+            <strong id="numero"></strong>
+        </p>
+
+
+        <p>
+            Destino:
+            <strong id="destino"></strong>
+        </p>
+
+
+
+        <button 
+        id="btnNovo"
+        class="btn principal">
+
+            Nova leitura
+
+        </button>
+
+
+
+    </div>
+
+
+
+</div>
+
+
+
+
+
+<script src="
+https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js">
+</script>
+
+
+
+<script type="module" src="js/app.js"></script>
+
+
+</body>
+
+</html>
