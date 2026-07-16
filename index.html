@@ -3,18 +3,17 @@
 
 <head>
 
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<meta name="viewport" 
-content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Scanner de Passagens</title>
-
-
-<link rel="stylesheet" href="css/style.css">
+    <title>Scanner de Passagens</title>
 
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 
 </head>
@@ -23,110 +22,144 @@ content="width=device-width, initial-scale=1.0">
 <body>
 
 
-<div class="app">
+    <div class="app">
 
 
-    <!-- TELA INICIAL -->
+        <!-- TELA INICIAL -->
 
-    <section id="telaInicio" class="card">
-
-
-        <div class="logo">
-            📷
-        </div>
+        <section id="telaInicio" class="card">
 
 
-        <h1>
-            Scanner de Passagens
-        </h1>
+            <div class="logo">
+                📷
+            </div>
 
 
-        <p>
-            Aponte a câmera para o QR Code da passagem
-        </p>
+            <h1>
+                Scanner de Passagens
+            </h1>
 
 
-
-        <button 
-        id="btnIniciar"
-        class="btn principal">
-
-            Iniciar Scanner
-
-        </button>
+            <p>
+                Aponte a câmera para o QR Code da passagem
+            </p>
 
 
 
-    </section>
+            <button id="btnIniciar" class="btn principal">
+
+                Iniciar Scanner
+
+            </button>
+
+
+
+        </section>
 
 
 
 
 
-    <!-- SCANNER -->
+        <!-- SCANNER -->
 
 
-    <section 
-    id="telaScanner"
-    class="scanner"
-    hidden>
+        <section id="telaScanner" class="scanner" hidden>
 
 
-        <video 
-        id="camera"
-        autoplay
-        muted
-        playsinline>
-        </video>
+            <video id="camera" autoplay muted playsinline>
+            </video>
 
 
 
-        <canvas 
-        id="canvas"
-        hidden>
-        </canvas>
+            <canvas id="canvas-oculto"></canvas>
 
 
 
 
-        <div class="overlay">
+            <div class="overlay">
 
 
-            <div class="mira">
+                <div class="mira">
 
-                <span></span>
+                    <span></span>
+
+                </div>
+
+
 
             </div>
 
 
 
-        </div>
+
+
+            <div class="painel">
+
+
+                <h2>
+                    Escaneando...
+                </h2>
+
+
+                <p id="status">
+                    Posicione o QR Code dentro da área
+                </p>
+
+
+
+                <button id="btnCancelar" class="btn cancelar">
+
+
+                    Cancelar câmera
+
+
+                </button>
+
+
+
+            </div>
+
+
+
+        </section>
 
 
 
 
 
-        <div class="painel">
+
+        <!-- RESULTADO -->
 
 
-            <h2>
-                Escaneando...
+        <div id="resultado" class="resultado" hidden>
+
+
+            <div class="icone">
+                ✓
+            </div>
+
+
+            <h2 id="resultadoTitulo">
+                Passagem registrada
             </h2>
 
 
-            <p id="status">
-                Posicione o QR Code dentro da área
+            <p>
+                Número:
+                <strong id="numero"></strong>
+            </p>
+
+
+            <p>
+                Destino:
+                <strong id="destino"></strong>
             </p>
 
 
 
-            <button
-            id="btnCancelar"
-            class="btn cancelar">
+            <button id="btnNovo" class="btn principal">
 
-
-                Cancelar câmera
-
+                Nova leitura
 
             </button>
 
@@ -136,72 +169,19 @@ content="width=device-width, initial-scale=1.0">
 
 
 
-    </section>
-
-
-
-
-
-
-    <!-- RESULTADO -->
-
-
-    <div 
-    id="resultado"
-    class="resultado"
-    hidden>
-
-
-        <div class="icone">
-            ✓
-        </div>
-
-
-        <h2 id="resultadoTitulo">
-            Passagem registrada
-        </h2>
-
-
-        <p>
-            Número:
-            <strong id="numero"></strong>
-        </p>
-
-
-        <p>
-            Destino:
-            <strong id="destino"></strong>
-        </p>
-
-
-
-        <button 
-        id="btnNovo"
-        class="btn principal">
-
-            Nova leitura
-
-        </button>
-
-
-
     </div>
 
 
 
-</div>
 
 
-
-
-
-<script src="
+    <script src="
 https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js">
 </script>
 
 
 
-<script type="module" src="js/app.js"></script>
+    <script type="module" src="js/app.js"></script>
 
 
 </body>

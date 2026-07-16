@@ -1,253 +1,186 @@
 /* global jsQR */
 
+export async function iniciarCamera(videoEl) {
+
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: {
+      facingMode: {
+        ideal: "environment"
+      },
+      width: {
+        ideal: 1280
+      },
+      height: {
+        ideal: 720
+      }
+    },
+    audio:false
+  });
 
 
-export async function iniciarCamera(video){
+  videoEl.srcObject = stream;
 
+  videoEl.setAttribute("playsinline","");
+  videoEl.setAttribute("autoplay","");
+  videoEl.muted = true;
 
+  await videoEl.play();
 
-    const stream =
-    await navigator.mediaDevices.getUserMedia({
-
-        video:{
-
-
-            facingMode:{
-                ideal:"environment"
-            },
-
-            width:{
-                ideal:1280
-            },
-
-
-            height:{
-                ideal:720
-            }
-
-
-        },
-
-
-        audio:false
-
-    });
-
-
-
-
-
-    video.srcObject =
-    stream;
-
-
-
-    await video.play();
-
-
-
-    return stream;
-
-
+  return stream;
 }
-
-
-
-
 
 
 export function pararCamera(stream){
 
+  if(!stream) return;
 
-    if(!stream)
-    return;
+  stream.getTracks().forEach(track=>{
+    track.stop();
+  });
 
-
-
-    stream
-    .getTracks()
-    .forEach(track=>{
+}
 
 
-        track.stop();
+export function suportaLanterna(stream){
+
+  const track = stream?.getVideoTracks()[0];
+
+  const capabilities = track?.getCapabilities?.();
+
+  return !!capabilities?.torch;
+
+}
 
 
-    });
+export async function definirLanterna(stream,ligada){
 
+  const track = stream?.getVideoTracks()[0];
+
+  if(!track) return;
+
+  await track.applyConstraints({
+    advanced:[
+      {
+        torch:ligada
+      }
+    ]
+  });
 
 }
 
 
 
+export function criarLeitorQr(video,canvas,aoDetectar){
 
+ const ctx = canvas.getContext("2d");
 
 
+ let ativo=false;
+ let pausado=false;
+ let frame=null;
 
 
+ function ler(){
 
-export function criarLeitorQr(
-    video,
-    canvas,
-    callback
-){
+    if(!ativo) return;
 
 
+    frame=requestAnimationFrame(ler);
 
-    const ctx =
-    canvas.getContext("2d");
 
+    if(pausado) return;
 
 
-    let ativo=false;
+    if(video.readyState !== video.HAVE_ENOUGH_DATA)
+      return;
 
 
 
-    let frame;
+    const largura=video.videoWidth;
+    const altura=video.videoHeight;
 
 
+    canvas.width=largura;
+    canvas.height=altura;
 
-    function ler(){
 
+    ctx.drawImage(
+      video,
+      0,
+      0,
+      largura,
+      altura
+    );
 
 
-        if(!ativo)
-        return;
+    const imagem=ctx.getImageData(
+      0,
+      0,
+      largura,
+      altura
+    );
 
 
+    const codigo=jsQR(
+      imagem.data,
+      imagem.width,
+      imagem.height,
+      {
+        inversionAttempts:"attemptBoth"
+      }
+    );
 
-        frame =
-        requestAnimationFrame(ler);
 
+    if(codigo){
 
+      console.log(
+        "QR ENCONTRADO:",
+        codigo.data
+      );
 
-
-        if(video.readyState !== video.HAVE_ENOUGH_DATA)
-        return;
-
-
-
-
-
-        canvas.width =
-        video.videoWidth;
-
-
-
-        canvas.height =
-        video.videoHeight;
-
-
-
-
-        ctx.drawImage(
-            video,
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
-
-
-
-
-
-        const imagem =
-        ctx.getImageData(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
-
-
-
-
-
-        const codigo =
-        jsQR(
-
-            imagem.data,
-
-            imagem.width,
-
-            imagem.height
-
-        );
-
-
-
-
-
-        if(codigo){
-
-
-            callback(
-                codigo.data
-            );
-
-
-        }
-
-
+      aoDetectar(codigo.data);
 
     }
 
+ }
 
 
+ return {
 
 
-    return {
+ iniciar(){
+
+    ativo=true;
+
+    ler();
+
+ },
 
 
-        iniciar(){
+ pausar(){
+
+    pausado=true;
+
+ },
 
 
-            ativo=true;
+ retomar(){
 
-            ler();
+    pausado=false;
 
-
-        },
-
+ },
 
 
-        parar(){
+ parar(){
 
+    ativo=false;
 
-            ativo=false;
+    if(frame)
+      cancelAnimationFrame(frame);
 
+ }
 
-            cancelAnimationFrame(frame);
-
-
-        },
-
-
-        pausar(){
-
-
-            ativo=false;
-
-
-        },
-
-
-        retomar(){
-
-
-            if(!ativo){
-
-                ativo=true;
-
-                ler();
-
-            }
-
-
-        }
-
-
-    };
+ }
 
 
 }

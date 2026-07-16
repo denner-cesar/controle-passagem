@@ -617,3 +617,120 @@ video{
 
 
 }
+
+/* ============================
+   Canvas usado pelo leitor QR
+   Fica invisível, mas continua
+   sendo processado pelo jsQR
+============================ */
+
+#canvas-oculto {
+  display: none;
+}
+
+
+/* ============================
+   Ajustes para câmera mobile
+============================ */
+
+#video-camera {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+
+
+/* evita zoom estranho no celular */
+html,
+body {
+  overflow: hidden;
+  touch-action: none;
+}
+
+
+/* melhora a área do scanner */
+.tela-scanner {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+
+/* animação da linha de leitura */
+.linha-scan {
+  animation: scanMove 2s infinite ease-in-out;
+}
+
+
+@keyframes scanMove {
+
+  0% {
+    transform: translateY(-80px);
+    opacity: .3;
+  }
+
+  50% {
+    transform: translateY(80px);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-80px);
+    opacity: .3;
+  }
+
+}
+
+
+/* deixa a mira mais visível no celular */
+
+.mira {
+
+  position: relative;
+
+  width:260px;
+  height:260px;
+
+}
+
+
+.canto {
+
+  position:absolute;
+
+  width:35px;
+  height:35px;
+
+  border-color:#00ff99;
+  border-style:solid;
+
+}
+
+
+.canto-se {
+  top:0;
+  left:0;
+  border-width:4px 0 0 4px;
+}
+
+
+.canto-sd {
+  top:0;
+  right:0;
+  border-width:4px 4px 0 0;
+}
+
+
+.canto-ie {
+  bottom:0;
+  left:0;
+  border-width:0 0 4px 4px;
+}
+
+
+.canto-id {
+  bottom:0;
+  right:0;
+  border-width:0 4px 4px 0;
+}
