@@ -1,18 +1,11 @@
 /* global jsQR */
 
 
-// ===============================
-// INICIAR CAMERA
-// ===============================
-
 export async function iniciarCamera(videoEl) {
-
-  console.log("Iniciando câmera...");
 
   const stream = await navigator.mediaDevices.getUserMedia({
 
     video: {
-
       facingMode: {
         ideal: "environment"
       },
@@ -24,7 +17,6 @@ export async function iniciarCamera(videoEl) {
       height: {
         ideal: 1080
       }
-
     },
 
     audio:false
@@ -34,15 +26,12 @@ export async function iniciarCamera(videoEl) {
 
   videoEl.srcObject = stream;
 
-  videoEl.autoplay = true;
-  videoEl.playsInline = true;
+  videoEl.setAttribute("playsinline","");
+  videoEl.setAttribute("autoplay","");
   videoEl.muted = true;
 
 
   await videoEl.play();
-
-
-  console.log("Câmera pronta");
 
 
   return stream;
@@ -51,41 +40,26 @@ export async function iniciarCamera(videoEl) {
 
 
 
-// ===============================
-// PARAR CAMERA
-// ===============================
-
 export function pararCamera(stream){
 
-  if(!stream) return;
-
-
-  stream
-    .getTracks()
-    .forEach(track=>track.stop());
+  stream?.getTracks()
+  .forEach(track=>track.stop());
 
 }
 
 
 
-// ===============================
-// LANTERNA
-// ===============================
-
 export function suportaLanterna(stream){
 
-  const track =
-    stream?.getVideoTracks?.()[0];
+ const track =
+ stream?.getVideoTracks?.()[0];
 
 
-  const capacidades =
-    track?.getCapabilities?.();
+ const cap =
+ track?.getCapabilities?.();
 
 
-  return Boolean(
-    capacidades &&
-    capacidades.torch
-  );
+ return Boolean(cap?.torch);
 
 }
 
@@ -93,259 +67,245 @@ export function suportaLanterna(stream){
 
 export async function definirLanterna(stream,ligada){
 
-
-  const track =
-    stream?.getVideoTracks?.()[0];
-
-
-  if(!track) return;
+ const track =
+ stream?.getVideoTracks?.()[0];
 
 
-  await track.applyConstraints({
+ if(!track) return;
 
-    advanced:[
 
-      {
-        torch:ligada
-      }
+ await track.applyConstraints({
 
-    ]
+  advanced:[
+   {
+    torch:ligada
+   }
+  ]
 
-  });
+ });
 
 }
 
 
 
-// ===============================
-// LEITOR QR CODE
-// ===============================
+
 
 export function criarLeitorQr(
-  video,
-  canvas,
-  aoDetectar
+ video,
+ canvas,
+ aoDetectar
 ){
 
 
- const ctx =
-   canvas.getContext(
-     "2d",
-     {
-       willReadFrequently:true
-     }
-   );
+let ativo=false;
+
+let pausado=false;
+
+let frame=null;
 
 
- let ativo=false;
-
- let pausado=false;
-
- let frame=null;
+const ctx =
+canvas.getContext("2d");
 
 
+// leitor nativo do Chrome Android
 
- function processar(){
-
-
-   if(!ativo) return;
-
-
-
-   frame =
-    requestAnimationFrame(processar);
+const detector =
+"BarcodeDetector" in window
+?
+new BarcodeDetector({
+ formats:["qr_code"]
+})
+:
+null;
 
 
 
-   if(pausado)
-     return;
+async function ler(){
+
+
+ if(!ativo)
+ return;
 
 
 
-   if(
-     video.readyState !==
-     video.HAVE_ENOUGH_DATA
-   ){
-     return;
+ frame=requestAnimationFrame(ler);
+
+
+
+ if(pausado)
+ return;
+
+
+
+ if(video.readyState !== video.HAVE_ENOUGH_DATA)
+ return;
+
+
+
+ try{
+
+
+   // =====================
+   // MÉTODO NATIVO ANDROID
+   // =====================
+
+
+   if(detector){
+
+
+    const codigos =
+      await detector.detect(video);
+
+
+
+    if(codigos.length){
+
+
+      console.log(
+       "QR NATIVO:",
+       codigos[0].rawValue
+      );
+
+
+      aoDetectar(
+       codigos[0].rawValue
+      );
+
+
+      return;
+
+    }
+
    }
 
 
 
+
+
+   // =====================
+   // FALLBACK jsQR
+   // =====================
+
+
    const largura =
-      video.videoWidth;
+   video.videoWidth;
 
 
    const altura =
-      video.videoHeight;
+   video.videoHeight;
 
 
 
-   if(!largura || !altura)
-      return;
+   canvas.width=largura;
 
-
-
-   console.log(
-     "Camera:",
-     largura,
-     altura
-   );
-
-
-
-   canvas.width =
-      largura;
-
-
-   canvas.height =
-      altura;
+   canvas.height=altura;
 
 
 
    ctx.drawImage(
-     video,
-     0,
-     0,
-     largura,
-     altura
+    video,
+    0,
+    0,
+    largura,
+    altura
    );
 
 
 
-   // ===============================
-   // RECORTE CENTRAL
-   // ===============================
-
-
-   const tamanho =
-     Math.floor(
-       Math.min(
-         largura,
-         altura
-       ) * 0.75
-     );
-
-
-   const x =
-     Math.floor(
-       (largura - tamanho) / 2
-     );
-
-
-   const y =
-     Math.floor(
-       (altura - tamanho) / 2
-     );
-
-
-
    const imagem =
-      ctx.getImageData(
-        x,
-        y,
-        tamanho,
-        tamanho
-      );
+   ctx.getImageData(
+    0,
+    0,
+    largura,
+    altura
+   );
 
 
 
    const codigo =
-      jsQR(
-
-        imagem.data,
-
-        imagem.width,
-
-        imagem.height,
-
-        {
-
-          inversionAttempts:
-          "attemptBoth"
-
-        }
-
-      );
+   jsQR(
+    imagem.data,
+    imagem.width,
+    imagem.height,
+    {
+     inversionAttempts:
+     "attemptBoth"
+    }
+   );
 
 
 
    if(codigo){
 
-      console.log(
-        "===================="
-      );
 
-      console.log(
-        "QR ENCONTRADO:",
-        codigo.data
-      );
-
-      console.log(
-        "===================="
-      );
+    console.log(
+     "QR jsQR:",
+     codigo.data
+    );
 
 
-      aoDetectar(
-        codigo.data
-      );
+    aoDetectar(
+     codigo.data
+    );
+
 
    }
 
 
+
+ }catch(e){
+
+   console.log(
+    "Erro leitura QR",
+    e
+   );
 
  }
 
 
-
-
- return {
-
-
-   iniciar(){
-
-     console.log(
-       "Leitor iniciado"
-     );
-
-     ativo=true;
-
-     processar();
-
-   },
+}
 
 
 
-   pausar(){
 
-     pausado=true;
-
-   },
+return {
 
 
+ iniciar(){
 
-   retomar(){
+  ativo=true;
 
-     pausado=false;
+  ler();
 
-   },
-
-
-
-   parar(){
-
-     ativo=false;
+ },
 
 
-     if(frame){
+ pausar(){
 
-       cancelAnimationFrame(frame);
+  pausado=true;
 
-     }
-
-   }
+ },
 
 
- };
+ retomar(){
+
+  pausado=false;
+
+ },
+
+
+ parar(){
+
+  ativo=false;
+
+  if(frame)
+  cancelAnimationFrame(frame);
+
+ }
+
+
+};
 
 
 }
