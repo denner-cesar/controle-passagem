@@ -1,23 +1,20 @@
-import { createClient } 
-from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from 
+"https://esm.sh/@supabase/supabase-js@2";
 
 
-import { CONFIG } 
-from "./config.js";
+const supabaseUrl =
+"https://dmmzndngdpmlcxosfzin.supabase.co";
+
+
+const supabaseKey =
+"sb_publishable_j9NaTQohufo2kfqPLlZKuQ_VWgBiPeF";
 
 
 
-export const supabase = createClient(
-
-    CONFIG.SUPABASE_URL,
-
-    CONFIG.SUPABASE_ANON_KEY
-
+export const supabase =
+createClient(
+    supabaseUrl,
+    supabaseKey
 );
 
 
-
-console.log(
-    "Supabase conectado:",
-    supabase
-);

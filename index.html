@@ -7,14 +7,11 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Scanner de Passagens</title>
-
+    <title>Controle de Passagens</title>
 
     <link rel="stylesheet" href="css/style.css">
 
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
 
 </head>
 
@@ -25,148 +22,97 @@
     <div class="app">
 
 
-        <!-- TELA INICIAL -->
-
-        <section id="telaInicio" class="card">
+        <div class="card">
 
 
             <div class="logo">
-                📷
+                🚌
             </div>
 
 
             <h1>
-                Scanner de Passagens
+                Controle de Passagens
             </h1>
 
 
             <p>
-                Aponte a câmera para o QR Code da passagem
+                Registro de bilhete
             </p>
 
 
 
-            <button id="btnIniciar" class="btn principal">
+            <label>
+                Número da passagem
+            </label>
 
-                Iniciar Scanner
+            <input id="numero-bilhete" type="text" placeholder="Ex: 000123">
+
+
+
+            <label>
+                Foto do bilhete
+            </label>
+
+
+
+            <button id="botao-camera" class="btn camera">
+
+                 Abrir câmera
 
             </button>
 
 
 
-        </section>
+            <input id="foto-bilhete" type="file" accept="image/*" capture="environment" hidden>
+
+
+
+            <img id="preview-foto" class="preview" hidden>
+
+
+
+            <button id="botao-remover-foto" class="btn remover" hidden>
+
+                 Remover foto
+
+            </button>
+
+
+
+            <button id="botao-registrar" class="btn">
+
+                Registrar passagem
+
+            </button>
 
 
 
 
 
-        <!-- SCANNER -->
+            <div id="resultado" class="resultado" hidden>
 
 
-        <section id="telaScanner" class="scanner" hidden>
-
-
-            <video id="camera" autoplay muted playsinline>
-            </video>
-
-
-
-            <canvas id="canvas-oculto"></canvas>
-
-
-
-
-            <div class="overlay">
-
-
-                <div class="mira">
-
-                    <span></span>
-
-                </div>
-
-
-
-            </div>
-
-
-
-
-
-            <div class="painel">
-
-
-                <h2>
-                    Escaneando...
+                <h2 id="resultado-titulo">
                 </h2>
 
 
-                <p id="status">
-                    Posicione o QR Code dentro da área
+                <p>
+                    Bilhete:
+                    <strong id="resultado-bilhete"></strong>
+                </p>
+
+
+                <p>
+                    Leituras:
+                    <strong id="resultado-leituras"></strong>
                 </p>
 
 
 
-                <button id="btnCancelar" class="btn cancelar">
-
-
-                    Cancelar câmera
-
-
-                </button>
-
-
-
             </div>
-
-
-
-        </section>
-
-
-
-
-
-
-        <!-- RESULTADO -->
-
-
-        <div id="resultado" class="resultado" hidden>
-
-
-            <div class="icone">
-                ✓
-            </div>
-
-
-            <h2 id="resultadoTitulo">
-                Passagem registrada
-            </h2>
-
-
-            <p>
-                Número:
-                <strong id="numero"></strong>
-            </p>
-
-
-            <p>
-                Destino:
-                <strong id="destino"></strong>
-            </p>
-
-
-
-            <button id="btnNovo" class="btn principal">
-
-                Nova leitura
-
-            </button>
-
 
 
         </div>
-
 
 
     </div>
@@ -174,14 +120,8 @@
 
 
 
-
-    <script src="
-https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js">
-</script>
-
-
-
-    <script type="module" src="js/app.js"></script>
+    <script type="module" src="js/app.js">
+    </script>
 
 
 </body>

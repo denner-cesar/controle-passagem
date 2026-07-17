@@ -1,267 +1,204 @@
-import { extrairDadosQr } from "./qrParser.js";
-
-import { registrarLeituraPassagem } from "./passagemService.js";
-
-import {
-
-    iniciarCamera,
-    pararCamera,
-    criarLeitorQr
-
-} from "./scanner.js";
+import { registrarPassagem } from "./passagemService.js";
 
 
+// CAMPOS
 
-// ==========================
-// ELEMENTOS
-// ==========================
-
-
-const telaInicio =
-document.getElementById("telaInicio");
+const numeroBilhete = 
+document.getElementById("numero-bilhete");
 
 
-const telaScanner =
-document.getElementById("telaScanner");
+const botaoCamera =
+document.getElementById("botao-camera");
 
 
-const camera =
-document.getElementById("camera");
+const fotoBilhete =
+document.getElementById("foto-bilhete");
 
 
-const canvas =
-document.getElementById("canvas");
+const previewFoto =
+document.getElementById("preview-foto");
 
 
-const btnIniciar =
-document.getElementById("btnIniciar");
+const botaoRemoverFoto =
+document.getElementById("botao-remover-foto");
 
 
-const btnCancelar =
-document.getElementById("btnCancelar");
+const botaoRegistrar =
+document.getElementById("botao-registrar");
 
+
+
+// RESULTADO
 
 const resultado =
 document.getElementById("resultado");
 
 
-const numero =
-document.getElementById("numero");
+const resultadoTitulo =
+document.getElementById("resultado-titulo");
 
 
-const destino =
-document.getElementById("destino");
+const resultadoBilhete =
+document.getElementById("resultado-bilhete");
 
 
-const status =
-document.getElementById("status");
-
-
-const btnNovo =
-document.getElementById("btnNovo");
+const resultadoLeituras =
+document.getElementById("resultado-leituras");
 
 
 
+// MENSAGEM
 
-// ==========================
-// ESTADO
-// ==========================
-
-
-let stream = null;
-
-let leitor = null;
-
-let processando = false;
-
-let ultimoCodigo = "";
+const mensagem =
+document.createElement("div");
 
 
+mensagem.className = "mensagem";
 
 
-
-console.log(
-"Aplicativo iniciado"
+botaoRegistrar.parentNode.insertBefore(
+    mensagem,
+    botaoRegistrar
 );
 
 
 
+let arquivoFoto = null;
+
+
+
+// ABRIR CAMERA
+
+botaoCamera.addEventListener(
+"click",
+()=>{
+
+    fotoBilhete.click();
+
+});
 
 
 
 
-// ==========================
-// INICIAR CAMERA
-// ==========================
+
+// PEGAR FOTO
+
+fotoBilhete.addEventListener(
+"change",
+()=>{
 
 
-btnIniciar.onclick = async()=>{
+    arquivoFoto = fotoBilhete.files[0];
 
 
-    try{
+    if(arquivoFoto){
 
 
-        console.log(
-        "Abrindo câmera..."
+        previewFoto.src =
+        URL.createObjectURL(arquivoFoto);
+
+
+        previewFoto.hidden = false;
+
+
+        botaoRemoverFoto.hidden = false;
+
+
+        botaoCamera.textContent =
+        "Trocar foto";
+
+
+        mostrarMensagem(
+        "Foto adicionada com sucesso",
+        "sucesso"
         );
-
-
-
-        stream =
-        await iniciarCamera(camera);
-
-
-
-        telaInicio.hidden=true;
-
-
-        telaScanner.hidden=false;
-
-
-
-
-        leitor =
-        criarLeitorQr(
-
-            camera,
-
-            canvas,
-
-            lerQr
-
-        );
-
-
-
-        leitor.iniciar();
-
-
-
-        status.textContent =
-        "Aponte para o QR Code";
-
-
 
     }
 
 
-    catch(erro){
+});
 
 
-        console.error(
-        erro
+
+
+
+
+// REMOVER FOTO
+
+botaoRemoverFoto.addEventListener(
+"click",
+()=>{
+
+
+    arquivoFoto = null;
+
+
+    fotoBilhete.value = "";
+
+
+    previewFoto.src = "";
+
+
+    previewFoto.hidden = true;
+
+
+    botaoRemoverFoto.hidden = true;
+
+
+    botaoCamera.textContent =
+    "Abrir câmera";
+
+
+});
+
+
+
+
+
+
+
+// REGISTRAR PASSAGEM
+
+botaoRegistrar.addEventListener(
+"click",
+async()=>{
+
+
+    if(!numeroBilhete.value.trim()){
+
+
+        mostrarMensagem(
+        "Digite o número da passagem",
+        "erro"
         );
 
 
-        alert(
-        "Erro ao abrir câmera"
-        );
+        numeroBilhete.focus();
 
+
+        return;
 
     }
 
 
-};
 
 
 
+    if(!arquivoFoto){
 
 
+        mostrarMensagem(
+        "Tire a foto do bilhete antes de continuar",
+        "erro"
+        );
 
 
-
-
-// ==========================
-// CANCELAR CAMERA
-// ==========================
-
-
-btnCancelar.onclick = ()=>{
-
-
-    fecharCamera();
-
-
-};
-
-
-
-
-
-
-function fecharCamera(){
-
-
-
-    if(leitor){
-
-
-        leitor.parar();
-
-
-        leitor=null;
-
+        return;
 
     }
 
 
 
-    pararCamera(stream);
-
-
-
-    stream=null;
-
-
-
-    telaScanner.hidden=true;
-
-
-    telaInicio.hidden=false;
-
-
-}
-
-
-
-
-
-
-
-
-
-// ==========================
-// LER QR CODE
-// ==========================
-
-
-async function lerQr(codigo){
-
-
-
-    console.log(
-    "QR encontrado:",
-    codigo
-    );
-
-
-
-
-    if(processando)
-    return;
-
-
-
-    if(codigo===ultimoCodigo)
-    return;
-
-
-
-    ultimoCodigo=codigo;
-
-
-
-    processando=true;
 
 
 
@@ -269,115 +206,172 @@ async function lerQr(codigo){
     try{
 
 
-        status.textContent =
-        "Registrando passagem...";
+        botaoRegistrar.disabled = true;
 
 
+        botaoRegistrar.textContent =
+        "Registrando...";
 
-
-        const dados =
-        extrairDadosQr(
-            codigo
-        );
-
-
-
-        console.log(
-        dados
-        );
 
 
 
 
 
         const resposta =
-        await registrarLeituraPassagem(
-            dados
+
+        await registrarPassagem({
+
+            numero_passagem:
+
+            numeroBilhete.value.trim(),
+
+
+            foto:
+
+            arquivoFoto
+
+        });
+
+
+
+
+
+
+        mostrarResultado(resposta);
+
+
+
+
+
+        mostrarMensagem(
+        "Passagem registrada com sucesso",
+        "sucesso"
         );
 
 
 
 
 
-        mostrarResultado(
-            resposta
-        );
+
+
+        // LIMPAR FORMULÁRIO
+
+        numeroBilhete.value = "";
+
+
+        arquivoFoto = null;
+
+
+        fotoBilhete.value = "";
+
+
+        previewFoto.src = "";
+
+
+        previewFoto.hidden = true;
+
+
+        botaoRemoverFoto.hidden = true;
+
+
+        botaoCamera.textContent =
+        "Abrir câmera";
 
 
 
-    }
 
 
-    catch(erro){
 
 
-        console.error(
-        erro
-        );
-
-
-        alert(
-        erro.message
-        );
-
-
-    }
-
-
-    finally{
-
+        // LIMPAR MENSAGEM
 
         setTimeout(()=>{
 
 
-            processando=false;
+            mensagem.textContent = "";
+
+
+            mensagem.className =
+            "mensagem";
+
+
+        },1000);
 
 
 
-        },2000);
 
+
+
+
+
+        // RELOAD
+
+        setTimeout(()=>{
+
+
+            window.location.reload();
+
+
+        },1500);
+
+
+
+
+
+
+    }catch(error){
+
+
+        console.error(error);
+
+
+        mostrarMensagem(
+        "Erro ao registrar passagem",
+        "erro"
+        );
+
+
+    }
+
+    finally{
+
+
+        botaoRegistrar.disabled = false;
+
+
+        botaoRegistrar.textContent =
+        "Registrar passagem";
 
 
     }
 
 
 
-}
+});
 
 
 
 
 
 
-
-
-
-// ==========================
-// RESULTADO
-// ==========================
 
 
 function mostrarResultado(dados){
 
 
-
-    resultado.hidden=false;
-
+    resultado.hidden = false;
 
 
-    numero.textContent =
+    resultadoTitulo.textContent =
+    "Passagem registrada";
+
+
+    resultadoBilhete.textContent =
     dados.numero_passagem;
 
 
-
-    destino.textContent =
-    dados.destino ??
-    "Não informado";
-
-
-
-    leitor?.pausar();
-
+    resultadoLeituras.textContent =
+    dados.quantidade_leituras;
 
 
 }
@@ -387,23 +381,30 @@ function mostrarResultado(dados){
 
 
 
-// ==========================
-// NOVA LEITURA
-// ==========================
+
+function mostrarMensagem(texto,tipo){
 
 
-btnNovo.onclick = ()=>{
+    mensagem.textContent =
+    texto;
 
 
-    resultado.hidden=true;
-
-
-
-    ultimoCodigo="";
+    mensagem.className =
+    "mensagem " + tipo;
 
 
 
-    leitor?.retomar();
+    setTimeout(()=>{
 
 
-};
+        mensagem.textContent = "";
+
+
+        mensagem.className =
+        "mensagem";
+
+
+    },3000);
+
+
+}

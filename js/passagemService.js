@@ -1,73 +1,58 @@
 import { supabase } from "./supabaseClient.js";
 
 
-
-const ID_DISPOSITIVO =
-
-`web-${Math.random()
-.toString(36)
-.substring(2,10)}`;
+export async function registrarPassagem(dados){
 
 
+    const {
 
-export async function registrarLeituraPassagem(dados){
+        numero_passagem,
+        foto
 
-
-
-    console.log(
-        "Enviando para banco:",
-        dados
-    );
-
-
-
-    const {data,error} = await supabase.rpc(
-
-        "registrar_leitura",
-
-        {
-
-            p_numero_passagem:
-            dados.numero_passagem,
-
-
-            p_destino:
-            dados.destino ?? null,
-
-
-            p_dispositivo:
-            ID_DISPOSITIVO,
-
-
-            p_cobrador_id:
-            null
-
-        }
-
-    );
+    } = dados;
 
 
 
 
-    console.log(
-        "Resposta Supabase:",
-        data
-    );
+    // ===========================
+    // Validações
+    // ===========================
 
 
-    console.log(
-        "Erro:",
-        error
-    );
-
-
-
-
-
-    if(error){
+    if(!numero_passagem){
 
         throw new Error(
-            error.message
+            "Número do bilhete obrigatório"
+        );
+
+    }
+
+
+
+    if(!foto){
+
+        throw new Error(
+            "Foto do bilhete obrigatória"
+        );
+
+    }
+
+
+
+    if(!foto.type.startsWith("image/")){
+
+        throw new Error(
+            "Arquivo precisa ser uma imagem"
+        );
+
+    }
+
+
+
+    if(foto.size > 5 * 1024 * 1024){
+
+        throw new Error(
+            "Imagem muito grande. Máximo 5MB"
         );
 
     }
@@ -76,10 +61,128 @@ export async function registrarLeituraPassagem(dados){
 
 
 
-    const resultado =
-    Array.isArray(data)
-    ? data[0]
-    : data;
+    // ===========================
+    // Upload foto privada
+    // ===========================
+
+
+    const extensao =
+    foto.name.split(".").pop().toLowerCase();
+
+
+
+    const nomeArquivo =
+
+    `bilhetes/${crypto.randomUUID()}.${extensao}`;
+
+
+
+
+
+    const { error:uploadError } =
+
+    await supabase.storage
+
+    .from("bilhetes")
+
+    .upload(
+
+        nomeArquivo,
+
+        foto,
+
+        {
+
+            upsert:false
+
+        }
+
+    );
+
+
+
+
+
+    if(uploadError){
+
+        throw uploadError;
+
+    }
+
+
+
+
+
+    // ===========================
+    // Informações do dispositivo
+    // ===========================
+
+
+    const dispositivo =
+
+    navigator.userAgent.substring(0,100);
+
+
+
+
+
+    // ===========================
+    // Registrar leitura
+    // ===========================
+
+
+    const { data,error } =
+
+    await supabase.rpc(
+
+        "registrar_leitura",
+
+        {
+
+            p_numero_passagem:
+
+            numero_passagem,
+
+
+
+            p_destino:
+
+            null,
+
+
+
+            p_dispositivo:
+
+            dispositivo,
+
+
+
+            p_cobrador_id:
+
+            null,
+
+
+
+            p_foto_bilhete:
+
+            nomeArquivo
+
+        }
+
+    );
+
+
+
+
+
+    if(error){
+
+        console.error(error);
+
+        throw error;
+
+    }
+
 
 
 
@@ -87,21 +190,17 @@ export async function registrarLeituraPassagem(dados){
     return {
 
 
-        numero_passagem:
-        resultado.numero_passagem,
+        ...data[0],
 
 
-        destino:
-        resultado.destino,
+        foto_bilhete:
+
+        nomeArquivo,
 
 
-        status:
-        resultado.status,
+        eh_fraude:
 
-
-        quantidade_leituras:
-        resultado.quantidade_leituras
-
+        data[0].eh_fraude
 
     };
 
