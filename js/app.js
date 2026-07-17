@@ -408,3 +408,38 @@ function mostrarMensagem(texto,tipo){
 
 
 }
+if("serviceWorker" in navigator){
+
+
+    window.addEventListener(
+    "load",
+    ()=>{
+
+
+        navigator.serviceWorker.register(
+        "service-worker.js"
+        )
+
+
+        .then(()=>{
+
+            console.log(
+            "Aplicativo instalado"
+            );
+
+        })
+
+
+        .catch(error=>{
+
+            console.error(
+            "Erro no Service Worker",
+            error
+            );
+
+        });
+
+
+    });
+
+}
